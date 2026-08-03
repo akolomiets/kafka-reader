@@ -7,7 +7,6 @@ import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
-import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
 class JBusyPanel : JPanel(GridBagLayout()) {
 

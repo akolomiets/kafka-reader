@@ -38,7 +38,7 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
     }
 
     private class BrokerModel(
-        val id: String = System.nanoTime().toString(),
+        val id: String = "%018d".format(System.nanoTime()),
         var name: String,
         var view: ConfigBrokerView = ConfigBrokerView(
             type = ConfigBrokerView.ViewType.CUSTOM,
@@ -134,7 +134,11 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
                 val newName = it.name.replace(Regex("\\s+\\(Clone\\s+\\d+\\)$", RegexOption.IGNORE_CASE), "")
                 BrokerModel(
                     name = "$newName (Clone ${brokers.size + 1})",
-                    view = it.view,
+                    view = ConfigBrokerView(
+                        type = it.view.type,
+                        custom = it.view.custom,
+                        properties = it.view.properties
+                    ),
                     properties = it.properties
                 )
             }
@@ -255,7 +259,11 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
                 )
             } else {
                 null
-            }
+            },
+            filterFavoriteTopics = broker.view.filterFavoriteTopics,
+            favoriteTopics = broker.view.favoriteTopics,
+            filterFavoriteGroups = broker.view.filterFavoriteGroups,
+            favoriteGroups = broker.view.favoriteGroups
         )
         broker.properties = if (broker.view.type == ConfigBrokerView.ViewType.PROPERTIES && broker.view.properties?.source == ConfigBrokerView.SourceType.FILE) {
             emptyMap()

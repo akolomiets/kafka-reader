@@ -27,6 +27,7 @@ import java.time.Duration
 import javax.swing.*
 import javax.swing.table.TableColumn
 import javax.swing.table.TableRowSorter
+import javax.swing.text.DefaultCaret
 
 internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel(MigLayout("insets 0 0 10 0, gap 10")), View<ConsumerViewModel> {
 
@@ -169,7 +170,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
                         textComponent.text = ""
                         textComponent.postActionEvent()
                     }
-                    it.columns = 24
+                    it.columns = 32
                     it.maximumSize = it.preferredSize
                 }
 
@@ -219,6 +220,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
 
         val textArea = jtextarea {
             it.isEditable = false
+            (it.caret as DefaultCaret).updatePolicy = DefaultCaret.NEVER_UPDATE
             it.bindModel(viewModel, ConsumerViewModel::recordValue)
         }
         +(jscrollpane(textArea) to "span, push, grow")
@@ -231,6 +233,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
 
         val textArea = jtextarea {
             it.isEditable = false
+            (it.caret as DefaultCaret).updatePolicy = DefaultCaret.NEVER_UPDATE
             it.bindModel(viewModel, ConsumerViewModel::recordKey)
         }
         +(jscrollpane(textArea) to "span, push, grow")
@@ -239,6 +242,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
     private fun headersPanel(): JComponent {
         val textArea = jtextarea {
             it.isEditable = false
+            (it.caret as DefaultCaret).updatePolicy = DefaultCaret.NEVER_UPDATE
             it.bindModel(viewModel, ConsumerViewModel::recordHeaders)
         }
         return jscrollpane(textArea) { it.border = BorderFactory.createEmptyBorder(10, 9, 0, 10) }

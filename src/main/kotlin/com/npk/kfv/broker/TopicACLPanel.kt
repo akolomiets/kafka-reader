@@ -13,7 +13,16 @@ import javax.swing.JPanel
 internal class TopicACLPanel(override val viewModel: TopicACLViewModel) : JPanel(BorderLayout()), View<TopicACLViewModel> {
 
     init {
-        add(jscrollpane(jtable(viewModel.tableModel)), BorderLayout.CENTER)
+        val table = jtable(viewModel.tableModel) { table ->
+            (2 .. 3).forEach { index ->
+                table.columnModel.getColumn(index).let {
+                    it.minWidth = viewModel.tableModel.getColumnWidth(index)
+                    it.maxWidth = viewModel.tableModel.getColumnWidth(index)
+                    it.resizable = false
+                }
+            }
+        }
+        add(jscrollpane(table), BorderLayout.CENTER)
         viewModel.addPropertyChangeListener(ACTION_RELOAD_TOPIC_ACL_PROPERTY, ::onLoadACL)
     }
 

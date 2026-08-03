@@ -48,7 +48,7 @@ class TopicsTableModel(private val parentModel: BrokerPanelViewModel) : Abstract
             ApplicationMessages["table.topics[5]"]
         )
         private val COLUMN_TYPES = arrayOf(Any::class.java, String::class.java, Long::class.javaObjectType, Int::class.javaObjectType, Int::class.javaObjectType, String::class.java)
-        private val COLUMN_WIDTH = arrayOf(36, 240, 110, 80, 120, 110)
+        private val COLUMN_WIDTH = arrayOf(36, 360, 100, 80, 80, 80)
     }
 
     var tableData: List<Tuples.Tuple2<String, List<TopicPartitionDesc>>> = emptyList()
@@ -258,7 +258,7 @@ class TopicACLTableModel : AbstractTableModel(), HasTableColumnWidth {
             ApplicationMessages["table.topic.acl[3]"],
             ApplicationMessages["table.topic.acl[4]"]
         )
-        private val COLUMN_WIDTH = arrayOf(340, 160, 100, 100)
+        private val COLUMN_WIDTH = arrayOf(360, 120, 120, 120)
     }
 
     var tableData: List<AccessControlEntry> = emptyList()

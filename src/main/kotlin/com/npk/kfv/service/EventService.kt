@@ -5,9 +5,7 @@ import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.reflect.KClass
 
-
 class ConfigBrokersUpdatedEvent : EventService.Event
-
 
 class EventService {
 

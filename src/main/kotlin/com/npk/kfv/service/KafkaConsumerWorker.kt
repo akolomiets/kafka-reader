@@ -121,6 +121,7 @@ class KafkaConsumerWorker(
         } catch (_: CancellationException) {
             running.set(false)
         } catch (e: ExecutionException) {
+            running.set(false)
             val cause = e.cause
             if (cause != null && cause !is WakeupException) {
                 val record = KafkaConsumerRecord(

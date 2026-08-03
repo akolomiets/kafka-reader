@@ -123,8 +123,9 @@ class ConsumerViewModel(configBroker: ConfigBroker) : ViewModel() {
         consumerWorker = KafkaConsumerWorker(connectionProperties, consumerConfig, recordsTableModel)
             .also { worker ->
                 worker.addPropertyChangeListener { event ->
-                    if (event.propertyName == "state" && event.newValue == SwingWorker.StateValue.STARTED) {
-                        firePropertyChange(ACTION_START_CONSUMING, false, isConsuming)
+                    when (event.propertyName) {
+                        "state" if event.newValue == SwingWorker.StateValue.STARTED -> firePropertyChange(ACTION_START_CONSUMING, false, true)
+                        "state" if event.newValue == SwingWorker.StateValue.DONE -> firePropertyChange(ACTION_STOP_CONSUMING, true, false)
                     }
                 }
                 worker.execute()
@@ -133,7 +134,6 @@ class ConsumerViewModel(configBroker: ConfigBroker) : ViewModel() {
 
     fun stopConsuming() {
         logger.log(Level.INFO, "[$loggerMarker] Stopping consumer")
-        firePropertyChange(ACTION_STOP_CONSUMING, isConsuming, false)
         consumerWorker?.stop()
     }
 

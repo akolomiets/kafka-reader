@@ -9,8 +9,11 @@ import com.npk.kfv.components.JBusyPanel
 import com.npk.kfv.components.JCardPanel
 import com.npk.kfv.components.JFileField
 import com.npk.kfv.components.JStatusLabel
-import com.npk.kfv.service.*
+import com.npk.kfv.service.ConfigBrokerView
 import com.npk.kfv.service.ConfigBrokerView.ViewType
+import com.npk.kfv.service.ConfigBrokersUpdatedEvent
+import com.npk.kfv.service.EventService
+import com.npk.kfv.service.KafkaService
 import com.npk.swing.*
 import com.npk.swing.BindingHelper.bind
 import com.npk.swing.BindingHelper.bindModel
@@ -22,6 +25,7 @@ import java.beans.PropertyChangeEvent
 import java.nio.file.Files
 import javax.swing.*
 import javax.swing.event.TreeSelectionEvent
+import javax.swing.text.DefaultCaret
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeCellRenderer
 import javax.swing.tree.DefaultTreeModel
@@ -87,7 +91,10 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
         selectionModel.addTreeSelectionListener(::treeSelectionListener)
     }
 
-    private val brokerNameTextField = jtextfield { it.bind(viewModel, BrokersManagerViewModel::brokerName) }
+    private val brokerNameTextField = jtextfield {
+        (it.caret as DefaultCaret).updatePolicy = DefaultCaret.NEVER_UPDATE
+        it.bind(viewModel, BrokersManagerViewModel::brokerName)
+    }
     private val connectionStatusLabel = JStatusLabel(false)
 
     private lateinit var saslSettingsPanel: JPanel
@@ -204,7 +211,10 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
 
     private fun customConfigPanel() = jpanel(MigLayout("insets 0 30 0 15, gap 10")) {
         +(jlabel(ApplicationMessages["brokersManagerDialog.custom.servers"]))
-        +(jtextfield { it.bind(viewModel, BrokersManagerViewModel::propBootstrapServers) } to "pushx, growx, wrap")
+        +(jtextfield {
+            it.bind(viewModel, BrokersManagerViewModel::propBootstrapServers)
+            it.preferredSize = Dimension(0, 0)
+        } to "pushx, growx, wrap")
 
         +(jlabel(ApplicationMessages["brokersManagerDialog.custom.auth"]))
         val authenticationNoneRadioButton = jradiobutton(ApplicationMessages["brokersManagerDialog.custom.auth.none"], ConfigBrokerView.AuthenticationType.NONE.name)
@@ -226,10 +236,16 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
             +(jcheckbox(ApplicationMessages["brokersManagerDialog.custom.auth.sasl.ssl"]) { it.bind(viewModel, BrokersManagerViewModel::viewSASLEnableSSL) } to "wrap")
 
             +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.sasl.username"])
-            +(jtextfield { it.bind(viewModel, BrokersManagerViewModel::propSASLUsername) } to "pushx, growx, wrap")
+            +(jtextfield {
+                it.bind(viewModel, BrokersManagerViewModel::propSASLUsername)
+                it.preferredSize = Dimension(0, 0)
+            } to "pushx, growx, wrap")
 
             +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.sasl.password"])
-            +(jpasswordfield { it.bind(viewModel, BrokersManagerViewModel::propSASLPassword) } to "pushx, growx, wrap")
+            +(jpasswordfield {
+                it.bind(viewModel, BrokersManagerViewModel::propSASLPassword)
+                it.preferredSize = Dimension(0, 0)
+            } to "pushx, growx, wrap")
         }
 
         saslSslSettingsPanel = jpanel(MigLayout("insets 0 15 0 0, gap 10")) {
@@ -252,25 +268,49 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
 
             val truststorePanel = jpanel(MigLayout("insets 0 15 0 0, gap 10")) {
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.truststore.location"])
-                +(JFileField.ofSecureStoreFiles().apply { bind(viewModel, BrokersManagerViewModel::propTrustStoreLocation) } to "pushx, growx, wrap")
+                +(JFileField.ofSecureStoreFiles().also {
+                    it.bind(viewModel, BrokersManagerViewModel::propTrustStoreLocation)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.truststore.password"])
-                +(jpasswordfield().apply { bind(viewModel, BrokersManagerViewModel::propTrustStorePassword) } to "pushx, growx, wrap")
+                +(jpasswordfield {
+                    it.bind(viewModel, BrokersManagerViewModel::propTrustStorePassword)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
                 +(jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.keystore"]) to "split, span")
                 +(JSeparator() to "growx, wrap")
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.keystore.location"])
-                +(JFileField.ofSecureStoreFiles().apply { bind(viewModel, BrokersManagerViewModel::propKeyStoreLocation) } to "pushx, growx, wrap")
+                +(JFileField.ofSecureStoreFiles().also {
+                    it.bind(viewModel, BrokersManagerViewModel::propKeyStoreLocation)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.keystore.password"])
-                +(jpasswordfield().apply { bind(viewModel, BrokersManagerViewModel::propKeyStorePassword) } to "pushx, growx, wrap")
+                +(jpasswordfield {
+                    it.bind(viewModel, BrokersManagerViewModel::propKeyStorePassword)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.keystore.key.password"])
-                +(jpasswordfield().apply { bind(viewModel, BrokersManagerViewModel::propKeyPassword) } to "pushx, growx, wrap")
+                +(jpasswordfield {
+                    it.bind(viewModel, BrokersManagerViewModel::propKeyPassword)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
             }
             val certificatePanel = jpanel(MigLayout("insets 0 15 0 0, gap 10")) {
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.certif.accessKey"])
-                +(JFileField.ofAnyFiles().apply { bind(viewModel, BrokersManagerViewModel::propCertifKey) } to "pushx, growx, wrap")
+                +(JFileField.ofAnyFiles().also {
+                    it.bind(viewModel, BrokersManagerViewModel::propCertifKey)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.certif.accessCertif"])
-                +(JFileField.ofAnyFiles().apply { bind(viewModel, BrokersManagerViewModel::propCertifLocation) } to "pushx, growx, wrap")
+                +(JFileField.ofAnyFiles().also {
+                    it.bind(viewModel, BrokersManagerViewModel::propCertifLocation)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
                 +jlabel(ApplicationMessages["brokersManagerDialog.custom.auth.ssl.certif.caCertif"])
-                +(JFileField.ofAnyFiles().apply { bind(viewModel, BrokersManagerViewModel::propCertifCALocation) } to "pushx, growx, wrap")
+                +(JFileField.ofAnyFiles().also {
+                    it.bind(viewModel, BrokersManagerViewModel::propCertifCALocation)
+                    it.preferredSize = Dimension(0, 0)
+                } to "pushx, growx, wrap")
             }
             sslTypeCard.add(truststorePanel, ConfigBrokerView.SSLType.TRUSTSTORE.name)
             sslTypeCard.add(certificatePanel, ConfigBrokerView.SSLType.CERTIFICATE.name)
@@ -337,7 +377,10 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
         }
         val filePropsPanel = jpanel(MigLayout("insets 0, gap 10")) {
             +(jlabel(ApplicationMessages["brokersManagerDialog.props.source.file.path"]))
-            +(JFileField.ofPropertiesFiles().apply { bind(viewModel, BrokersManagerViewModel::viewPropertiesPath) } to "pushx, growx, wrap")
+            +(JFileField.ofPropertiesFiles().also {
+                it.bind(viewModel, BrokersManagerViewModel::viewPropertiesPath)
+                it.preferredSize = Dimension(0, 0)
+            } to "pushx, growx, wrap")
         }
 
         propsSourceCard.add(jscrollpane(implicitPropsPanel), ConfigBrokerView.SourceType.IMPLICIT.name)

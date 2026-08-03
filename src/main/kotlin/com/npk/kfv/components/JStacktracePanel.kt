@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent
 import java.io.PrintWriter
 import java.io.StringWriter
 import javax.swing.*
+import javax.swing.text.DefaultCaret
 
 class JStacktracePanel private constructor(val component: JComponent): JOptionPane(component, ERROR_MESSAGE, DEFAULT_OPTION) {
 
@@ -44,14 +45,14 @@ class JStacktracePanel private constructor(val component: JComponent): JOptionPa
     private class StacktraceComponent(owner: JComponent, e: Throwable, expanded: Boolean) : JPanel(GridBagLayout()) {
         init {
             val content = JScrollPane(
-                JTextArea(18, 0).apply {
+                JTextArea(18, 80).apply {
+                    (caret as DefaultCaret).updatePolicy = DefaultCaret.NEVER_UPDATE
                     font = Font(Font.MONOSPACED, Font.PLAIN, 12)
                     isEditable = false
                     text = StringWriter().use { writer ->
                         e.printStackTrace(PrintWriter(writer))
                         writer.toString()
                     }
-                    caretPosition = 0
                 }
             )
 

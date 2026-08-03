@@ -38,7 +38,7 @@ internal class FilterTablePanel<T>(override val viewModel: FilterTablePanelViewM
             textComponent.text = ""
             textComponent.postActionEvent()
         }
-        it.columns = 16
+        it.columns = 46
         it.maximumSize = it.preferredSize
         it.addActionListener { event -> viewModel.searchText = (event.source as JTextField).text }
     }
