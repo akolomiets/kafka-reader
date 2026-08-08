@@ -21,16 +21,16 @@ import kotlin.concurrent.thread
 internal class KafkaReaderTest {
 
     private val testValueGenerator: Map<Class<out Any>, Pair<String, RandomDataGenerator.() -> Any?>> = mapOf(
-        Short::class.java to ("short.topic" to { int().toShort() }),
-        Int::class.java to ("int.topic" to { int() }),
-        Long::class.java to ("long.topic" to { long() }),
-        Float::class.java to ("float.topic" to { float() }),
-        Double::class.java to ("double.topic" to { double() }),
-        Boolean::class.java to ("boolen.topic" to { boolean() }),
-        String::class.java to ("string.topic" to { string(10 .. 50) }),
-        ByteArray::class.java to ("byte.array.topic" to { string(10..20).toByteArray()}),
-        UUID::class.java to ("uuid.topic" to { UUID.randomUUID() }),
-        Void::class.java to ("void.topic" to { null })
+        Short::class.java to ("test.topic.short" to { int().toShort() }),
+        Int::class.java to ("test.topic.int" to { int() }),
+        Long::class.java to ("test.topic.long" to { long() }),
+        Float::class.java to ("test.topic.float" to { float() }),
+        Double::class.java to ("test.topic.double" to { double() }),
+        Boolean::class.java to ("test.topic.boolen" to { boolean() }),
+        String::class.java to ("test.topic.string" to { string(10 .. 50) }),
+        ByteArray::class.java to ("test.topic.byte.array" to { string(10..20).toByteArray()}),
+        UUID::class.java to ("test.topic.uuid" to { UUID.randomUUID() }),
+        Void::class.java to ("test.topic.void" to { null })
     )
 
     @Test
