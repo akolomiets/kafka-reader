@@ -43,6 +43,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
 
     private val topicComboBox = JComboBox(viewModel.topicsComboBoxModel).also {
         it.prototypeDisplayValue = PROTOTYPE_DISPLAY_VALUE
+        it.addPopupMenuListener(BoundsPopupMenuListener())
         it.bind(viewModel, ConsumerViewModel::topic)
         AutoCompleteDecorator.decorate(it)
     }
@@ -51,6 +52,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
     private val groupComboBox = JComboBox(viewModel.groupsComboBoxModel).also {
         it.prototypeDisplayValue = PROTOTYPE_DISPLAY_VALUE
         it.isEditable = true
+        it.addPopupMenuListener(BoundsPopupMenuListener())
         it.bind(viewModel, ConsumerViewModel::group)
         AutoCompleteDecorator.decorate(it)
     }
@@ -402,7 +404,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
             rowSorter.rowFilter = when (columnIndex) {
                 // in list
                 1, /* Partition */
-                2 /* Offset */ -> {
+                2  /* Offset */ -> {
                     val values: Set<String> = columnValue
                         .split(',', ';')
                         .filter { it.isNotBlank() }
@@ -418,7 +420,7 @@ internal class ConsumerPanel(override val viewModel: ConsumerViewModel) : JPanel
                 0, /* Topic */
                 3, /* Timestamp */
                 4, /* Key */
-                5 /* Value */ -> object : RowFilter<KafkaConsumerRecordsTableModel, Int>() {
+                5  /* Value */ -> object : RowFilter<KafkaConsumerRecordsTableModel, Int>() {
                     override fun include(entry: Entry<out KafkaConsumerRecordsTableModel, out Int>): Boolean {
                         val value = entry.model.getValueAt(entry.identifier, columnIndex).toString()
                         return value.contains(columnValue, true)

@@ -35,6 +35,8 @@ object ConfigService {
     private const val CONF_VIEW_FAVORITETOPICS_KEY =                "conf:view.favoriteTopics"
     private const val CONF_VIEW_FILTERFAVORITEGROUPS_KEY =          "conf:view.filterFavoriteGroups"
     private const val CONF_VIEW_FAVORITEGROUPS_KEY =                "conf:view.favoriteGroups"
+    private const val CONF_VIEW_TOPICSLIMIT_KEY =                   "conf:view.topicsLimit"
+    private const val CONF_VIEW_GROUPSLIMIT_KEY =                   "conf:view.groupsLimit"
 
     private const val CONF_PROPERTIES_KEY =                         "conf:properties"
 
@@ -128,6 +130,8 @@ object ConfigService {
                     }
                     CONF_PROPERTIES_KEY -> broker.properties =
                         parseStringToMap(value) { _, value -> if (CipherService.shouldDecrypt(value)) CipherService.decrypt(value) else value }
+                    CONF_VIEW_TOPICSLIMIT_KEY -> broker.view.topicsLimit = value
+                    CONF_VIEW_GROUPSLIMIT_KEY -> broker.view.groupsLimit = value
                 }
             }
         }
@@ -183,6 +187,14 @@ object ConfigService {
                         broker.view.favoriteGroups.forEach { println(it) }
                     }
                 }
+
+                if (broker.view.topicsLimit.isNotEmpty()) {
+                    printSection(CONF_VIEW_TOPICSLIMIT_KEY, broker.view.topicsLimit)
+                }
+                if (broker.view.groupsLimit.isNotEmpty()) {
+                    printSection(CONF_VIEW_GROUPSLIMIT_KEY, broker.view.groupsLimit)
+                }
+
                 if (!(broker.view.type == ConfigBrokerView.ViewType.PROPERTIES && broker.view.properties?.source == ConfigBrokerView.SourceType.FILE) && broker.properties.isNotEmpty()) {
                     printSection(CONF_PROPERTIES_KEY) {
                         val sensitiveProperties = KafkaService.allSensitivePropertyNames

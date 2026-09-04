@@ -106,7 +106,14 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
         defaultCloseOperation = DISPOSE_ON_CLOSE
         isModal = true
         minimumSize = Dimension(820, 530)
-        preferredSize = minimumSize
+
+        val windowBounds = ApplicationPrefs.brokersWindowBounds
+        if (windowBounds != null) {
+            bounds = windowBounds
+            preferredSize = Dimension(windowBounds.width, windowBounds.height)
+        } else {
+            preferredSize = minimumSize
+        }
 
         addWindowListener(object : WindowAdapter() {
             override fun windowClosing(event: WindowEvent) {
@@ -429,10 +436,10 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
             BrokersManagerViewModel::connectionStatus.name -> {
                 connectionStatusLabel.clean()
                 when (event.newValue as BrokersManagerViewModel.ConnectionStatus) {
-                    BrokersManagerViewModel.ConnectionStatus.Undefined -> { }
-                    BrokersManagerViewModel.ConnectionStatus.Process -> connectionStatusLabel.text = ApplicationMessages["brokersManagerDialog.test.process"]
-                    BrokersManagerViewModel.ConnectionStatus.Connected -> connectionStatusLabel.success(ApplicationMessages["brokersManagerDialog.test.success"])
-                    BrokersManagerViewModel.ConnectionStatus.Failure -> viewModel.connectionException.let { e ->
+                    BrokersManagerViewModel.ConnectionStatus.UNDEFINED -> { }
+                    BrokersManagerViewModel.ConnectionStatus.PROCESS -> connectionStatusLabel.text = ApplicationMessages["brokersManagerDialog.test.process"]
+                    BrokersManagerViewModel.ConnectionStatus.CONNECTED -> connectionStatusLabel.success(ApplicationMessages["brokersManagerDialog.test.success"])
+                    BrokersManagerViewModel.ConnectionStatus.FAILURE -> viewModel.connectionException.let { e ->
                         if (e != null) {
                             connectionStatusLabel.failure(ApplicationMessages["brokersManagerDialog.test.failure"], e)
                         } else {
@@ -522,12 +529,14 @@ class BrokersManagerDialog(owner: Window, override val viewModel: BrokersManager
         viewModel.saveBrokers { result ->
             result.getOrThrow()
             EventService.Default.fire(ConfigBrokersUpdatedEvent())
+            ApplicationPrefs.brokersWindowBounds = bounds
             dispose()
         }
     }
 
     private fun onCancelActionPerformed(event: ActionEvent) {
         if (!JBusyPanel.findGlassPaneForComponent(this).isRunning) {
+            ApplicationPrefs.brokersWindowBounds = bounds
             dispose()
         }
     }

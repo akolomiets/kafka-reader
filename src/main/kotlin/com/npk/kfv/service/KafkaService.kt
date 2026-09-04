@@ -48,7 +48,7 @@ object KafkaService {
         AdminClient.create(properties).use { client ->
             val options = DescribeClusterOptions()
             if (AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG !in properties) {
-                options.timeoutMs(ApplicationPrefs.requestTimeoutMs)
+                options.timeoutMs(ApplicationPrefs.requestTimeout.toMillis().toInt())
             }
             client.describeCluster(options).clusterId().get()
         }

@@ -31,7 +31,9 @@ data class ConfigBrokerView(
     var filterFavoriteTopics: Boolean = false,
     var favoriteTopics: Set<String> = emptySet(),
     var filterFavoriteGroups: Boolean = false,
-    var favoriteGroups: Set<String> = emptySet()
+    var favoriteGroups: Set<String> = emptySet(),
+    var topicsLimit: String = "",
+    var groupsLimit: String = ""
 ) {
 
     data class CustomView(

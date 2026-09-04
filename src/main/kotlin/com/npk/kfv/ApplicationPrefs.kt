@@ -15,25 +15,26 @@ import kotlin.math.abs
 import kotlin.properties.Delegates
 
 const val APPLICATION_NAME =        "Kafka Reader"
-const val APPLICATION_VERSION =     "2026.08"
+const val APPLICATION_VERSION =     "2026.09"
 const val APPLICATION_ARTIFACT_ID = "kafka-reader"
 val APPLICATION_GITHUB_HYPERLINK =  URI("https://github.com/akolomiets/kafka-reader")
 
 object ApplicationPrefs {
 
-    private const val APP_KEY =             "id"
-    private const val APP_DATA =            "data"
-    private const val LOCALE_KEY =          "locale"
-    private const val LAF_CLASS_NAME_KEY =  "laf.className"
-    private const val UI_SCALE_KEY =        "sun.java2d.uiScale"
-    private const val FONT_FAMILY_KEY =     "font.family"
-    private const val FONT_SIZE_KEY =       "font.size"
-    private const val WINDOW_STATE_KEY =    "window.state"
-    private const val WINDOW_BOUNDS_KEY =   "window.bounds"
-    private const val BROKERS_MAX_COUNT =   "brokers.max.count"
-    private const val BROKERS_SELECTED =    "brokers.selected"
-    private const val LOCAL_STORAGE_TTL =   "local.storage.ttl.sec"
-    private const val REQUEST_TIMEOUT_MS =  "request.timeout.ms"
+    private const val APP_KEY =                     "id"
+    private const val APP_DATA =                    "data"
+    private const val LOCALE_KEY =                  "locale"
+    private const val LAF_CLASS_NAME_KEY =          "laf.className"
+    private const val UI_SCALE_KEY =                "sun.java2d.uiScale"
+    private const val FONT_FAMILY_KEY =             "font.family"
+    private const val FONT_SIZE_KEY =               "font.size"
+    private const val MAIN_WINDOW_STATE_KEY =       "main.window.state"
+    private const val MAIN_WINDOW_BOUNDS_KEY =      "main.window.bounds"
+    private const val BROKERS_WINDOW_BOUNDS_KEY =   "brokers.window.bounds"
+    private const val BROKERS_MAX_COUNT =           "brokers.max.count"
+    private const val BROKERS_SELECTED =            "brokers.selected"
+    private const val LOCAL_STORAGE_TTL =           "local.storage.ttl.duration"
+    private const val REQUEST_TIMEOUT =             "request.timeout.duration"
 
     private val appRootPrefs = Preferences.userRoot().node(APPLICATION_ARTIFACT_ID)
     private val preferences = appRootPrefs.node(APPLICATION_VERSION)
@@ -91,22 +92,28 @@ object ApplicationPrefs {
         }
     }
 
-    var windowState: Int by Delegates.observable(preferences.getInt(WINDOW_STATE_KEY, JFrame.NORMAL)) { _, oldValue, newValue ->
+    var windowState: Int by Delegates.observable(preferences.getInt(MAIN_WINDOW_STATE_KEY, JFrame.NORMAL)) { _, oldValue, newValue ->
         if (oldValue != newValue) {
-            preferences.putInt(WINDOW_STATE_KEY, newValue)
+            preferences.putInt(MAIN_WINDOW_STATE_KEY, newValue)
         }
     }
 
-    var windowBounds: java.awt.Rectangle? by Delegates.observable(preferences.getWindowBounds()) { _, oldValue, newValue ->
+    var windowBounds: java.awt.Rectangle? by Delegates.observable(preferences.getBounds(MAIN_WINDOW_BOUNDS_KEY)) { _, oldValue, newValue ->
         if (oldValue != newValue) {
-            preferences.setWindowBounds(newValue)
+            preferences.setBounds(MAIN_WINDOW_BOUNDS_KEY, newValue)
+        }
+    }
+
+    var brokersWindowBounds: java.awt.Rectangle? by Delegates.observable(preferences.getBounds(BROKERS_WINDOW_BOUNDS_KEY)) { _, oldValue, newValue ->
+        if (oldValue != newValue) {
+            preferences.setBounds(BROKERS_WINDOW_BOUNDS_KEY, newValue)
         }
     }
 
     val brokersMaxCount: Int = preferences.getInt(BROKERS_MAX_COUNT, 0)
         .let { maxCount ->
             if (maxCount <= 0) {
-                8.also { preferences.putInt(BROKERS_MAX_COUNT, it) }
+                10.also { preferences.putInt(BROKERS_MAX_COUNT, it) }
             } else {
                 maxCount
             }
@@ -118,48 +125,51 @@ object ApplicationPrefs {
         }
     }
 
-    val localStorageTtl: Duration? = preferences.getInt(LOCAL_STORAGE_TTL, Int.MIN_VALUE)
-        .let { minutes ->
-            if (minutes == Int.MIN_VALUE) {
-                Duration.ofSeconds(300.also { preferences.putInt(LOCAL_STORAGE_TTL, it) }.toLong())
-            } else {
-                minutes
-                    .takeIf { it in 1..86400 }
-                    ?.let { Duration.ofSeconds(it.toLong()) }
-            }
-        }
+    val localStorageTtl: Duration = preferences.getDuration(LOCAL_STORAGE_TTL)
+        ?: Duration.ofMinutes(5).also { preferences.setDuration(LOCAL_STORAGE_TTL, it) }
 
-    val requestTimeoutMs: Int = preferences.getInt(REQUEST_TIMEOUT_MS, Int.MIN_VALUE)
-        .let { millis ->
-            if (millis == Int.MIN_VALUE) {
-                5000.also { preferences.putInt(REQUEST_TIMEOUT_MS, it) }
-            } else {
-                millis
-            }
-        }
+    val requestTimeout: Duration = preferences.getDuration(REQUEST_TIMEOUT)
+        ?: Duration.ofSeconds(15).also { preferences.setDuration(REQUEST_TIMEOUT, it) }
+
 
     private fun Preferences.getLocale() =
-        runCatching { Locale.forLanguageTag(preferences.get(LOCALE_KEY, null)) }
+        runCatching { Locale.forLanguageTag(get(LOCALE_KEY, null)) }
             .getOrDefault(Locale.ENGLISH)
 
-    private fun Preferences.getWindowBounds(): java.awt.Rectangle? {
-        val windowBoundsBytes = preferences.getByteArray(WINDOW_BOUNDS_KEY, null)
-        return if (windowBoundsBytes != null) {
+    private fun Preferences.getBounds(key: String): java.awt.Rectangle? {
+        val boundsBytes = getByteArray(key, null)
+        return if (boundsBytes != null) {
             runCatching {
-                ObjectInputStream(ByteArrayInputStream(windowBoundsBytes)).use { ois -> ois.readObject() as java.awt.Rectangle }
+                ObjectInputStream(ByteArrayInputStream(boundsBytes)).use { ois -> ois.readObject() as java.awt.Rectangle }
             }.getOrNull()
         } else {
             null
         }
     }
 
-    private fun Preferences.setWindowBounds(windowBounds: java.awt.Rectangle?) {
-        if (windowBounds != null) {
+    private fun Preferences.setBounds(key: String, bounds: java.awt.Rectangle?) {
+        if (bounds != null) {
             runCatching {
                 val bos = ByteArrayOutputStream()
-                ObjectOutputStream(bos).use { oos -> oos.writeObject(windowBounds) }
-                preferences.putByteArray(WINDOW_BOUNDS_KEY, bos.toByteArray())
+                ObjectOutputStream(bos).use { oos -> oos.writeObject(bounds) }
+                putByteArray(key, bos.toByteArray())
             }
+        }
+    }
+
+    private fun Preferences.getDuration(key: String): Duration? =
+        runCatching {
+            val value = get(key, "")
+            if (value.isNotEmpty()) {
+                Duration.parse(value)
+            } else {
+                null
+            }
+        }.getOrNull()
+
+    private fun Preferences.setDuration(key: String, duration: Duration?) {
+        if (duration != null) {
+            put(key, duration.toString())
         }
     }
 

@@ -18,7 +18,7 @@ for /f "usebackq delims=" %%a in ("%KAFKA_READER_HOME%\kafka-reader.jvm") do set
 @endlocal & set JVM_CONFIG=%JVM_CONFIG%
 
 :start
-start "Kafka Reader 2026.08" /B "%JAVA_CMD%" %JVM_CONFIG% -jar "%KAFKA_READER_HOME%\kafka-reader.jar" %*
+start "Kafka Reader 2026.09" /B "%JAVA_CMD%" %JVM_CONFIG% -jar "%KAFKA_READER_HOME%\kafka-reader.jar" %*
 endlocal & exit /b %errorlevel%
 
 :error

@@ -20,10 +20,10 @@ import kotlin.io.path.name
 class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
 
     enum class ConnectionStatus {
-        Undefined,
-        Process,
-        Connected,
-        Failure
+        UNDEFINED,
+        PROCESS,
+        CONNECTED,
+        FAILURE
     }
 
     enum class SecurityProtocol {
@@ -45,7 +45,7 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
             custom = ConfigBrokerView.CustomView(authentication = ConfigBrokerView.AuthenticationType.NONE)
         ),
         var properties: Map<String, String> = emptyMap(),
-        var status: ConnectionStatus = ConnectionStatus.Undefined,
+        var status: ConnectionStatus = ConnectionStatus.UNDEFINED,
         var exception: Exception? = null
     )
 
@@ -95,7 +95,7 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
     var propRawProperties: String by observableProperty("")
 
     var connectionException: Exception? = null
-    var connectionStatus: ConnectionStatus by observableProperty(ConnectionStatus.Undefined)
+    var connectionStatus: ConnectionStatus by observableProperty(ConnectionStatus.UNDEFINED)
 
     init {
         addPropertyChangeListener { event ->
@@ -175,7 +175,7 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
         logger.log(Level.FINE, "Check connection. Broker index: $selectedBrokerIndex")
         if (selectedBrokerIndex >= 0) {
             connectionException = null
-            connectionStatus = ConnectionStatus.Process
+            connectionStatus = ConnectionStatus.PROCESS
 
             val broker = brokers[selectedBrokerIndex]
             toModel(broker)
@@ -194,12 +194,12 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
                     try {
                         val clusterInfo = get()
                         logger.log(Level.FINE, "Connection success (clusterInfo: $clusterInfo)")
-                        connectionStatus = ConnectionStatus.Connected
+                        connectionStatus = ConnectionStatus.CONNECTED
                         callback(Result.success(Unit))
                     } catch (e: Exception) {
                         logger.log(Level.SEVERE, "Connection failure", e)
                         connectionException = e
-                        connectionStatus = ConnectionStatus.Failure
+                        connectionStatus = ConnectionStatus.FAILURE
                         callback(Result.failure(if (e is ExecutionException) e.cause ?: e else e))
                     }
                 }
@@ -263,7 +263,9 @@ class BrokersManagerViewModel(configBrokers: List<ConfigBroker>) : ViewModel() {
             filterFavoriteTopics = broker.view.filterFavoriteTopics,
             favoriteTopics = broker.view.favoriteTopics,
             filterFavoriteGroups = broker.view.filterFavoriteGroups,
-            favoriteGroups = broker.view.favoriteGroups
+            favoriteGroups = broker.view.favoriteGroups,
+            topicsLimit = broker.view.topicsLimit,
+            groupsLimit = broker.view.groupsLimit
         )
         broker.properties = if (broker.view.type == ConfigBrokerView.ViewType.PROPERTIES && broker.view.properties?.source == ConfigBrokerView.SourceType.FILE) {
             emptyMap()

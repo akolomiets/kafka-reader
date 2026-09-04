@@ -19,12 +19,12 @@ class BrokerPanelViewModel(val configBroker: ConfigBroker) : ViewModel() {
     val consumerViewModel: ConsumerViewModel = ConsumerViewModel(configBroker)
     val producerViewModel: ProducerViewModel = ProducerViewModel(configBroker)
 
-    val topicsFilterTableViewModel = FilterTablePanelViewModel(TopicsTableModel(this))
+    val topicsFilterTableViewModel = FilterTablePanelViewModel(TopicsTableModel(this), configBroker.view.topicsLimit)
     val topicPartitionsTableModel = TopicPartitionsTableModel()
     val topicConfigurationViewModel = TopicConfigurationViewModel(configBroker)
     val topicACLViewModel = TopicACLViewModel(configBroker)
 
-    val groupsFilterTableViewModel = FilterTablePanelViewModel(ConsumerGroupsTableModel(this))
+    val groupsFilterTableViewModel = FilterTablePanelViewModel(ConsumerGroupsTableModel(this), configBroker.view.groupsLimit)
     val groupDetailsTableModel = ConsumerGroupDetailsTableModel()
 
     var topic: String by observableProperty("")
@@ -72,8 +72,12 @@ class BrokerPanelViewModel(val configBroker: ConfigBroker) : ViewModel() {
                     saveConfigBroker(configBroker)
                     firePropertyChange(ACTION_RELOAD_TOPICS_PROPERTY, false, true)
                 }
-                FilterTablePanelViewModel<*>::searchText.name,
-                FilterTablePanelViewModel<*>::searchLimit.name -> firePropertyChange(ACTION_RELOAD_TOPICS_PROPERTY, false, true)
+                FilterTablePanelViewModel<*>::searchText.name -> firePropertyChange(ACTION_RELOAD_TOPICS_PROPERTY, false, true)
+                FilterTablePanelViewModel<*>::searchLimit.name -> {
+                    configBroker.view.topicsLimit = (event.newValue as FilterTablePanelViewModel.SearchLimit).code
+                    saveConfigBroker(configBroker)
+                    firePropertyChange(ACTION_RELOAD_TOPICS_PROPERTY, false, true)
+                }
                 ACTION_VIEW_DETAILS_PROPERTY -> firePropertyChange(ACTION_VIEW_DETAILS_TOPIC_PROPERTY, event.oldValue, event.newValue)
             }
         }
@@ -84,8 +88,12 @@ class BrokerPanelViewModel(val configBroker: ConfigBroker) : ViewModel() {
                     saveConfigBroker(configBroker)
                     firePropertyChange(ACTION_RELOAD_GROUPS_PROPERTY, false, true)
                 }
-                FilterTablePanelViewModel<*>::searchText.name,
-                FilterTablePanelViewModel<*>::searchLimit.name -> firePropertyChange(ACTION_RELOAD_GROUPS_PROPERTY, false, true)
+                FilterTablePanelViewModel<*>::searchText.name -> firePropertyChange(ACTION_RELOAD_GROUPS_PROPERTY, false, true)
+                FilterTablePanelViewModel<*>::searchLimit.name -> {
+                    configBroker.view.groupsLimit = (event.newValue as FilterTablePanelViewModel.SearchLimit).code
+                    saveConfigBroker(configBroker)
+                    firePropertyChange(ACTION_RELOAD_GROUPS_PROPERTY, false, true)
+                }
                 ACTION_VIEW_DETAILS_PROPERTY -> firePropertyChange(ACTION_VIEW_DETAILS_GROUP_PROPERTY, event.oldValue, event.newValue)
             }
         }
@@ -142,7 +150,7 @@ class BrokerPanelViewModel(val configBroker: ConfigBroker) : ViewModel() {
             override fun doInBackground(): List<Tuples.Tuple2<String, List<TopicPartitionDesc>>> {
                 val favoriteTopics = if (configBroker.view.filterFavoriteTopics) configBroker.view.favoriteTopics else emptySet()
                 val topicFilter = topicsFilterTableViewModel.searchText
-                val limit = topicsFilterTableViewModel.searchLimit.toIntOrNull() ?: 0
+                val limit = topicsFilterTableViewModel.searchLimit.value
 
                 logger.log(Level.INFO, "[$loggerMarker] List topics info")
                 return KafkaService.listTopicsInfo(configBroker.connectionProperties, favoriteTopics, topicFilter, limit)
@@ -165,7 +173,7 @@ class BrokerPanelViewModel(val configBroker: ConfigBroker) : ViewModel() {
             override fun doInBackground(): List<GroupDesc> {
                 val favoriteGroups = if (configBroker.view.filterFavoriteGroups) configBroker.view.favoriteGroups else emptySet()
                 val groupFilter = groupsFilterTableViewModel.searchText
-                val limit = groupsFilterTableViewModel.searchLimit.toIntOrNull() ?: 0
+                val limit = groupsFilterTableViewModel.searchLimit.value
 
                 logger.log(Level.INFO, "[$loggerMarker] List consumer groups info")
                 return KafkaService.listGroupsInfo(configBroker.connectionProperties, favoriteGroups, groupFilter, limit)

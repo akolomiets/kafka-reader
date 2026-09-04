@@ -147,16 +147,16 @@ class JBusyPanel : JPanel(GridBagLayout()) {
             g2d.fillRect(0, 0, width, height)
 
             g2d.paint = GradientPaint(
-                0f, (height - 220).toFloat(), background.let { Color(it.red, it.green, it.blue, 0) },
+                0f, (height - 260).toFloat(), background.let { Color(it.red, it.green, it.blue, 0) },
                 0f, height.toFloat(), background.let { Color(it.red, it.green, it.blue, 255) }
             )
-            g2d.fillRect(0, height - 220, width, 220)
+            g2d.fillRect(0, height - 260, width, 260)
 
             g2d.paint = GradientPaint(
-                0f, (height - 100).toFloat(), background.let { Color(it.red, it.green, it.blue, 0) },
+                0f, (height - 140).toFloat(), background.let { Color(it.red, it.green, it.blue, 0) },
                 0f, height.toFloat(), background.let { Color(it.red, it.green, it.blue, 255) }
             )
-            g2d.fillRect(0, height - 100, width, 100)
+            g2d.fillRect(0, height - 140, width, 140)
 
             g2d.paint = oldPainter
         }

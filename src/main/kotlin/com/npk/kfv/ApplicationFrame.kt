@@ -139,13 +139,14 @@ class ApplicationFrame : JFrame("$APPLICATION_NAME - $APPLICATION_VERSION") {
         })
 
         EventService.Default.addEventListener(ConfigBrokersUpdatedEvent::class) {
-            EventQueue.invokeLater {
-                val busyPanel = (glassPane as JBusyPanel).also { panel ->
-                    panel.progressText = ApplicationMessages["frame.reload.process"]
-                    panel.start()
-                }
+            Logger.getLogger(this.javaClass.getName()).log(Level.INFO, "Reload broker configs")
 
-                Logger.getLogger(this.javaClass.getName()).log(Level.INFO, "Reload broker configs")
+            val busyPanel = (glassPane as JBusyPanel).also { panel ->
+                panel.progressText = ApplicationMessages["frame.reload.process"]
+                panel.start()
+            }
+
+            SwingUtilities.invokeLater {
                 val selectedIndex = brokersTabbedPanel.selectedIndex
 
                 removeConfigAndDestroyBrokerTabs()
@@ -164,7 +165,7 @@ class ApplicationFrame : JFrame("$APPLICATION_NAME - $APPLICATION_VERSION") {
                 }
 
                 busyPanel.stop()
-                this.contentPane.run {
+                contentPane.run {
                     revalidate()
                     repaint()
                 }

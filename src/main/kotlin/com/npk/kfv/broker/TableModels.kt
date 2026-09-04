@@ -6,6 +6,7 @@ import com.npk.kfv.service.GroupDesc
 import com.npk.kfv.service.KafkaConsumerRecord
 import com.npk.kfv.service.TopicPartitionDesc
 import com.npk.kfv.synchronized
+import com.npk.swing.HasDisplayText
 import com.npk.swing.ViewModel
 import org.apache.kafka.clients.admin.ConfigEntry
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
@@ -14,15 +15,18 @@ import org.apache.kafka.common.acl.AccessControlEntry
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.TableModel
 
-class FilterTablePanelViewModel<T : TableModel>(val tableModel: T) : ViewModel() {
+class FilterTablePanelViewModel<T : TableModel>(val tableModel: T, selectedSearchLimit: String) : ViewModel() {
 
-    companion object {
-        val SEARCH_LIMIT_ITEMS = listOf("10", "50", "100", ApplicationMessages["table.all"])
+    enum class SearchLimit(val value: Int, val code: String, override val displayText: String) : HasDisplayText {
+        Ten(10, "10", "10"),
+        Fifty(50, "50", "50"),
+        AHundred(100, "100", "100"),
+        All(-1, "ALL", ApplicationMessages["table.all"])
     }
 
     var favoriteFilter: Boolean by observableProperty(false)
     var searchText: String by observableProperty("")
-    var searchLimit: String by observableProperty(SEARCH_LIMIT_ITEMS.first())
+    var searchLimit: SearchLimit by observableProperty(SearchLimit.entries.find { it.code == selectedSearchLimit } ?: SearchLimit.Ten)
 
     fun viewDetails(value: Any) {
         firePropertyChange(ACTION_VIEW_DETAILS_PROPERTY, null, value)

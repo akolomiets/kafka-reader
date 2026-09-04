@@ -43,7 +43,7 @@ internal class FilterTablePanel<T>(override val viewModel: FilterTablePanelViewM
         it.addActionListener { event -> viewModel.searchText = (event.source as JTextField).text }
     }
 
-    private val searchComboBox = jcombobox(FilterTablePanelViewModel.SEARCH_LIMIT_ITEMS) {
+    private val searchComboBox = jcombobox(FilterTablePanelViewModel.SearchLimit.entries) {
         it.maximumSize = it.preferredSize
         it.bind(viewModel, FilterTablePanelViewModel<*>::searchLimit)
     }
