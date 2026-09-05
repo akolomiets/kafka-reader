@@ -112,8 +112,9 @@ class ApplicationFrame : JFrame("$APPLICATION_NAME - $APPLICATION_VERSION") {
             )
             menuBar.add(
                 JMenu(ApplicationMessages["menu.help"]).also { menu ->
-                    menu.add(jaction(ApplicationMessages["menu.help.license"], ApplicationImages.Icons.Scales.icon, ::onLicense))
+                    menu.add(jaction(ApplicationMessages["menu.help.sysInfo"], ::onSysInfo))
                     menu.addSeparator()
+                    menu.add(jaction(ApplicationMessages["menu.help.license"], ApplicationImages.Icons.Scales.icon, ::onLicense))
                     menu.add(jaction(ApplicationMessages["menu.help.about"], ::onAbout))
                 }
             )
@@ -222,6 +223,14 @@ class ApplicationFrame : JFrame("$APPLICATION_NAME - $APPLICATION_VERSION") {
         }
 
         dispose()
+    }
+
+    private fun onSysInfo(event: ActionEvent) {
+        SystemInformationDialog(this).run {
+            pack()
+            setLocationRelativeTo(this@ApplicationFrame)
+            isVisible = true
+        }
     }
 
     private fun onLicense(event: ActionEvent) {

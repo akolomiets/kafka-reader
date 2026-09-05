@@ -135,6 +135,7 @@ class ConsumerViewModel(configBroker: ConfigBroker) : ViewModel() {
     fun stopConsuming() {
         logger.log(Level.INFO, "[$loggerMarker] Stopping consumer")
         consumerWorker?.stop()
+        consumerWorker = null
     }
 
     fun clearTableData() {

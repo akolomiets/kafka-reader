@@ -10,7 +10,6 @@ import java.util.*
 import java.util.jar.JarFile
 import java.util.jar.Manifest
 import javax.swing.*
-import kotlin.math.floor
 
 object AboutDialog {
 
@@ -42,7 +41,6 @@ private class AboutPanel : JPanel(GridBagLayout()) {
 
         constraints.insets = Insets(0, 0, 12, 0)
         add(JLabel(getBuildInformation()), constraints.apply { gridy = 1 })
-        add(createMemoryPanel(), constraints.apply { gridy++ })
         add(JLabel(getJVMInformation()), constraints.apply { gridy++ })
         add(JLabel("Copyright \u00A9 2026 Andrey Kolomiets"), constraints.apply { gridy++ })
 
@@ -77,39 +75,6 @@ private class AboutPanel : JPanel(GridBagLayout()) {
         } catch (_: Exception) {
             "#Undefined"
         }
-
-    private fun createMemoryPanel(): JPanel {
-        val progressBar = JProgressBar(1, 100).apply {
-            isStringPainted = true
-            preferredSize = Dimension(preferredSize.width, preferredSize.height + 8)
-            updateMemoryUsage()
-        }
-
-        val clearButton = JButton(ApplicationImages.Icons.Clear.icon).apply {
-            isFocusable = false
-            toolTipText = "Clean up the memory"
-            putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_TOOLBAR_BUTTON)
-            addActionListener {
-                Runtime.getRuntime().gc()
-                progressBar.updateMemoryUsage()
-            }
-        }
-
-        return JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
-            add(JLabel("Memory:"))
-            add(Box.createRigidArea(Dimension(10, 0)))
-            add(progressBar)
-            add(Box.createRigidArea(Dimension(3, 0)))
-            add(clearButton)
-        }
-    }
-
-    private fun JProgressBar.updateMemoryUsage() {
-        val totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024
-        val usedMem = totalMem - Runtime.getRuntime().freeMemory() / 1024 / 1024
-        setValue(floor(usedMem * 100.0 / totalMem).toInt())
-        setString(usedMem.toString() + "M of " + totalMem + "M")
-    }
 
     private fun getJVMInformation(): String =
         """

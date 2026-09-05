@@ -48,4 +48,12 @@ internal class DialogsTest {
         }
     }
 
+    @Test
+    fun `System Information dialog`() {
+        SystemInformationDialog(JFrame()).run {
+            pack()
+            isVisible = true
+        }
+    }
+
 }
