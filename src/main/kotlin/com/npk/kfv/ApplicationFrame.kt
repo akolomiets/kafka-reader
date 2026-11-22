@@ -115,6 +115,7 @@ class ApplicationFrame : JFrame("$APPLICATION_NAME - $APPLICATION_VERSION") {
                     menu.add(jaction(ApplicationMessages["menu.help.sysInfo"], ::onSysInfo))
                     menu.addSeparator()
                     menu.add(jaction(ApplicationMessages["menu.help.license"], ApplicationImages.Icons.Scales.icon, ::onLicense))
+                    menu.add(jaction(ApplicationMessages["menu.help.update"], ::onUpdate))
                     menu.add(jaction(ApplicationMessages["menu.help.about"], ::onAbout))
                 }
             )
@@ -235,6 +236,10 @@ class ApplicationFrame : JFrame("$APPLICATION_NAME - $APPLICATION_VERSION") {
 
     private fun onLicense(event: ActionEvent) {
         LicenseDialog.showDialog(this)
+    }
+
+    private fun onUpdate(event: ActionEvent) {
+        UpdateDialog.showDialog(this)
     }
 
     private fun onAbout(event: ActionEvent) {

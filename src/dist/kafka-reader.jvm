@@ -1,3 +1,4 @@
 -Xms64m
 -Xmx256m
 -XX:+HeapDumpOnOutOfMemoryError
+-Djava.net.useSystemProxies=true

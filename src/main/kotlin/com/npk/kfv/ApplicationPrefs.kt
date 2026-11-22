@@ -15,7 +15,7 @@ import kotlin.math.abs
 import kotlin.properties.Delegates
 
 const val APPLICATION_NAME =        "Kafka Reader"
-const val APPLICATION_VERSION =     "2026.09"
+const val APPLICATION_VERSION =     "2026.12"
 const val APPLICATION_ARTIFACT_ID = "kafka-reader"
 val APPLICATION_GITHUB_HYPERLINK =  URI("https://github.com/akolomiets/kafka-reader")
 

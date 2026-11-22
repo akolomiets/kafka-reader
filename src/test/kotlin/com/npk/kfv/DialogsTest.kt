@@ -56,4 +56,9 @@ internal class DialogsTest {
         }
     }
 
+    @Test
+    fun `Update dialog`() {
+        UpdateDialog.showDialog(JFrame())
+    }
+
 }

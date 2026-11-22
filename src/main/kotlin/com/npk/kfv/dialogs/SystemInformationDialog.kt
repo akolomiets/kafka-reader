@@ -65,7 +65,7 @@ class SystemInformationDialog(owner: Window) : JDialog(owner), View<SystemInform
                     cpuLoadProgressBar.value = systemMetrics.cpuLoad
                 }
                 val totalMem = systemMetrics.totalMemory / 1024 / 1024
-                val usedMem = systemMetrics.freeMemory / 1024 / 1024
+                val usedMem = totalMem - (systemMetrics.freeMemory / 1024 / 1024)
                 memoryUsageProgressBar.value = floor(usedMem * 100.0 / totalMem).toInt()
                 memoryUsageProgressBar.string = "$usedMem MB of $totalMem MB"
             }
@@ -78,6 +78,7 @@ class SystemInformationDialog(owner: Window) : JDialog(owner), View<SystemInform
         panel.addTab(ApplicationMessages["systemInfoDialog.basic"], jscrollpane(basicInformationPanel()))
         panel.addTab(ApplicationMessages["systemInfoDialog.prop"], jscrollpane(jtable(viewModel.systemPropertiesTableModel)))
         panel.addTab(ApplicationMessages["systemInfoDialog.env"], jscrollpane(jtable(viewModel.environmentVariablesTableModel)))
+        panel.addTab(ApplicationMessages["systemInfoDialog.jar"], jscrollpane(jtable(viewModel.jarInfoTableModel)))
     }
 
     private fun basicInformationPanel() = jpanel(MigLayout("insets 10, gap 10")) {
@@ -131,7 +132,7 @@ class SystemInformationDialog(owner: Window) : JDialog(owner), View<SystemInform
         +(cpuLoadProgressBar to "pushx, growx, wrap")
 
         +(jlabel(ApplicationMessages["systemInfoDialog.basic.mem"]))
-        +(jbutton(ApplicationImages.Icons.Clear.icon, { Runtime.getRuntime().gc() }) {
+        +(jbutton(ApplicationImages.Icons.Clear.icon, { viewModel.cleanupMemory() }) {
             it.isFocusable = false
             it.toolTipText = ApplicationMessages["systemInfoDialog.basic.mem.clean"]
             it.putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)

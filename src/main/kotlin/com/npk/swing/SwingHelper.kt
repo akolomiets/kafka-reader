@@ -7,10 +7,13 @@ import com.npk.kfv.broker.HasTableColumnWidth
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.util.*
 import java.util.function.Consumer
 import javax.swing.*
 import javax.swing.plaf.basic.BasicComboBoxRenderer
+import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableModel
 import javax.swing.text.AbstractDocument
 import javax.swing.text.AttributeSet
@@ -222,6 +225,12 @@ fun <T> jtable(model: T, block: (JTable) -> Unit = {}): JTable where T : TableMo
             // autoResizeMode = JTable.AUTO_RESIZE_OFF
             tableHeader.reorderingAllowed = false
             selectionModel.selectionMode = ListSelectionModel.SINGLE_SELECTION
+
+            val numberCellRenderer = FormattedNumberCellRenderer(DecimalFormat("#,###"))
+
+            setDefaultRenderer(Int::class.javaObjectType, numberCellRenderer)
+            setDefaultRenderer(Long::class.javaObjectType, numberCellRenderer)
+
             for (i in 0 ..< columnModel.columnCount) {
                 columnModel.getColumn(i).preferredWidth = model.getColumnWidth(i)
             }
@@ -247,6 +256,15 @@ fun <T> jtable(model: T, block: (JTable) -> Unit = {}): JTable where T : TableMo
             }
         }
     }.apply(block)
+
+private class FormattedNumberCellRenderer(private val format: NumberFormat) : DefaultTableCellRenderer.UIResource() {
+    init {
+        setHorizontalAlignment(JLabel.RIGHT)
+    }
+    override fun getTableCellRendererComponent(table: JTable, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Component {
+        return super.getTableCellRendererComponent(table, if (value != null && value is Number) format.format(value) else value, isSelected, hasFocus, row, column)
+    }
+}
 
 //endregion
 

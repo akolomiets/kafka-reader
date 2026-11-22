@@ -15,7 +15,12 @@ object ApplicationImages {
     private val logoUrl = if (FlatLaf.isLafDark()) requireResource("/ico/logo_dark.svg") else requireResource("/ico/logo.svg")
 
     val applicationIcons: List<Image> by lazy { FlatSVGUtils.createWindowIconImages(logoUrl) }
+
     val logo: Image by lazy { FlatSVGUtils.svg2image(logoUrl, 64, 64) }
+    val logoUpdate: Image by lazy {
+        val svgUrl = if (FlatLaf.isLafDark()) requireResource("/ico/logoUpdate_dark.svg") else requireResource("/ico/logoUpdate.svg")
+        FlatSVGUtils.svg2image(svgUrl, 64, 64)
+    }
 
     val bannerLogo: Icon by lazy {
         ImageIcon(FlatSVGUtils.svg2image(requireResource(if (FlatLaf.isLafDark()) "/ico/kafka_dark.svg" else "/ico/kafka.svg"), 64, 64))
